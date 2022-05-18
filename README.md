@@ -9,3 +9,12 @@ Digital videos hold a tremendous amount of information. The knowledge available 
 Within each video, you can find a lot of moments that trigger your interest to explore the specific information that maybe is only a few seconds or a small segment of the video. You need to register these moments to explore the information contained.
 
 SharingShard provides the capability to explore each moment. First, you register the moment in the video and write a note to identify what you found in that segment, known as a moment.
+
+#References
+
+Notion: https://beinginreinventiontimeonceagain.notion.site/SharingShard-6efe7e4857e741f9ba7391c0ecf6346d
+Trello: https://trello.com/b/tgWFhao1/sharingshard 
+Discord: TBD
+Twitter: TBD
+Website: TBD
+Contact: TBD
