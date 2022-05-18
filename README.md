@@ -12,9 +12,9 @@ SharingShard provides the capability to explore each moment. First, you register
 
 #References
 
-Notion: https://beinginreinventiontimeonceagain.notion.site/SharingShard-6efe7e4857e741f9ba7391c0ecf6346d
-Trello: https://trello.com/b/tgWFhao1/sharingshard 
-Discord: TBD
-Twitter: TBD
-Website: TBD
-Contact: TBD
+- Notion: https://beinginreinventiontimeonceagain.notion.site/SharingShard-6efe7e4857e741f9ba7391c0ecf6346d
+- Trello: https://trello.com/b/tgWFhao1/sharingshard 
+- Discord: TBD
+- Twitter: TBD
+- Website: TBD
+- Contact: TBD
