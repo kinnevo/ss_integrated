@@ -10,7 +10,7 @@ Within each video, you can find a lot of moments that trigger your interest to e
 
 SharingShard provides the capability to explore each moment. First, you register the moment in the video and write a note to identify what you found in that segment, known as a moment.
 
-#References
+# References
 
 - Notion: https://beinginreinventiontimeonceagain.notion.site/SharingShard-6efe7e4857e741f9ba7391c0ecf6346d
 - Trello: https://trello.com/b/tgWFhao1/sharingshard 
