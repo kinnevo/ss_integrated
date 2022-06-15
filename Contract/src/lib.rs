@@ -2,14 +2,11 @@ use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::{U128};
 use near_sdk::collections::{LookupMap, UnorderedMap};
-use near_sdk::serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 /*
 ** Structures
 */
-#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[derive(BorshSerialize, BorshDeserialize)]
 struct Experience{
     title: String,
     owner: AccountId,
@@ -20,7 +17,7 @@ struct Experience{
     exp_date: i64,
     moment: String,
     time: u16,
-    pov: HashMap<AccountId, String>,
+    pov: UnorderedMap<AccountId, String>,
 }
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize)]
@@ -80,7 +77,7 @@ impl Contract {
             reward: reward,
             moment: "".to_string(),
             time : 0,
-            pov: HashMap::new(),
+            pov: UnorderedMap::new(b"m"),
             topic: topic.clone(),
             exp_date: expire_date
         });
@@ -144,7 +141,8 @@ impl Contract {
         self.experience.get(&video_n).unwrap().time
     }
 
-    pub fn get_pov_of_vid(&self, video_n: u128) ->HashMap<AccountId,String>{
+    #[result_serializer(borsh)]
+    pub fn get_pov_of_vid(&self, video_n: u128) ->UnorderedMap<AccountId,String>{
         self.experience.get(&video_n).unwrap().pov
     }
 
