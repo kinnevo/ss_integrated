@@ -62,7 +62,7 @@ impl Contract {
     }
     
     pub fn new_user(&mut self, wallet: AccountId, n: String, disc: String, mail: String, interst: u8){
-        //assert wallet
+        assert!(!self.users.contains_key(&wallet.clone()), "User already exists");
         self.users.insert(&wallet.clone(), &User{name: n, discord: disc, email: mail, interests: interst, my_exp: Vec::new(), pov_exp: Vec::new(), date: 0});
     }
     
