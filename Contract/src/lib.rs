@@ -6,8 +6,9 @@ use near_sdk::collections::{LookupMap, UnorderedMap};
 /*
 ** Structures
 */
+#[derive(Debug)]
 #[derive(BorshSerialize, BorshDeserialize)]
-struct Experience{
+pub struct Experience{
     title: String,
     owner: AccountId,
     description: String,
@@ -19,9 +20,9 @@ struct Experience{
     time: u16,
     pov: UnorderedMap<AccountId, String>,
 }
-#[near_bindgen]
+#[derive(Debug)]
 #[derive(BorshSerialize, BorshDeserialize)]
-struct User{
+pub struct User{
     name: String,
     discord: String,
     email: String,
@@ -149,7 +150,20 @@ impl Contract {
 /*
 ** Getters
 */
-    pub fn get_title(&self, video_n: u128) -> String{
+    #[result_serializer(borsh)]
+    pub fn get_experience(&self, video_n: u128) ->Experience{
+        assert!(self.experience.contains_key(&video_n.clone()),
+        "Experience number {} does not exist", video_n);
+        self.experience.get(&video_n.clone()).unwrap()
+    }
+
+    #[result_serializer(borsh)]
+    pub fn get_user(&self, wallet: AccountId) ->User{
+        assert!(self.users.contains_key(&wallet.clone()), "No such user");
+        self.users.get(&wallet).unwrap()
+    }
+
+    pub fn get_title(&self, video_n: u128) ->String{
         assert!(self.experience.contains_key(&video_n.clone()),
         "Experience number {} does not exist", video_n);
         self.experience.get(&video_n.clone()).unwrap().title
@@ -276,6 +290,10 @@ fn main() {
     let rew = contract.get_reward(1);
     contract.add_pov(1, id2.clone(), "first pov".to_string());
     contract.add_pov(1, id.clone(), "second pov".to_string());
+    let exp_tmp = contract.get_experience(1);
+    let usr_tmp = contract.get_user(id.clone());
+    println!("{:?}", usr_tmp);
+    println!("{:?}", exp_tmp);
     println!("reward for experience 1 = {:?}", rew);
     println!("url = {}", contract.get_url(1));
     println!("{} experience title = {:?}", exp, contract.get_title(exp));
