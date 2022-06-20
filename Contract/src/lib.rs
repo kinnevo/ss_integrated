@@ -2,13 +2,28 @@ use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::{U128};
 use near_sdk::collections::{LookupMap, UnorderedMap};
+use serde::{Deserialize, Serialize};
 
 /*
 ** Structures
 */
-#[derive(Debug)]
-#[derive(BorshSerialize, BorshDeserialize)]
-pub struct Experience{
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Experience_json{
+    title: String,
+    owner: AccountId,
+    description: String,
+    url: String,
+    topic: u8,
+    reward: u128,
+    exp_date: i64,
+    moment: String,
+    time: u16,
+    pov: Vec<(AccountId, String)>,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+struct Experience{
     title: String,
     owner: AccountId,
     description: String,
@@ -20,8 +35,8 @@ pub struct Experience{
     time: u16,
     pov: UnorderedMap<AccountId, String>,
 }
-#[derive(Debug)]
-#[derive(BorshSerialize, BorshDeserialize)]
+
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Debug)]
 pub struct User{
     name: String,
     discord: String,
@@ -31,6 +46,7 @@ pub struct User{
     pov_exp: Vec<u128>,
     date: i64,
 }
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract{
@@ -150,14 +166,23 @@ impl Contract {
 /*
 ** Getters
 */
-    #[result_serializer(borsh)]
-    pub fn get_experience(&self, video_n: u128) ->Experience{
+    pub fn get_experience(&self, video_n: u128) ->Experience_json{
         assert!(self.experience.contains_key(&video_n.clone()),
         "Experience number {} does not exist", video_n);
-        self.experience.get(&video_n.clone()).unwrap()
+        let exp = self.experience.get(&video_n.clone()).unwrap();
+        Experience_json{title: exp.title,
+            owner: exp.owner,
+            description: exp.description,
+            url: exp.url,
+            reward: exp.reward,
+            moment: exp.moment,
+            time : exp.time,
+            pov: exp.pov.to_vec(),
+            topic: exp.topic,
+            exp_date: exp.exp_date
+        }
     }
 
-    #[result_serializer(borsh)]
     pub fn get_user(&self, wallet: AccountId) ->User{
         assert!(self.users.contains_key(&wallet.clone()), "No such user");
         self.users.get(&wallet).unwrap()
@@ -294,6 +319,10 @@ fn main() {
     let usr_tmp = contract.get_user(id.clone());
     println!("{:?}", usr_tmp);
     println!("{:?}", exp_tmp);
+    //let exp_encoded = exp.try_to_vec().unwrap();
+    //println!("experience encoded = {:?}", exp_encoded.clone());
+    //let exp_decoded = Experience::try_from_slice(&exp_encoded).unwrap();
+    //println!("experience decoded = {:?}", exp_decoded);
     println!("reward for experience 1 = {:?}", rew);
     println!("url = {}", contract.get_url(1));
     println!("{} experience title = {:?}", exp, contract.get_title(exp));

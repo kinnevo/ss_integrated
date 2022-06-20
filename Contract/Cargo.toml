@@ -16,6 +16,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 near-sdk = "=4.0.0-pre.5"
+serde = { version = "1", features = ["derive"] }
 
 [profile.release]
 codegen-units = 1
