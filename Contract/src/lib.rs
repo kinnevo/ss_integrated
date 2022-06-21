@@ -1,8 +1,12 @@
-use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault};
+use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::{U128};
 use near_sdk::collections::{LookupMap, UnorderedMap};
 use serde::{Deserialize, Serialize};
+
+const YOCTO_NEAR: u128 = 1_000_000_000_000_000_000_000_000;
+//https://docs.near.org/docs/concepts/storage-staking
+const STORAGE_PER_BYTE: Balance = 10_000_000_000_000_000_000;
 
 /*
 ** Structures
@@ -80,6 +84,7 @@ impl Contract {
 /*
 ** Setters
 */
+    #[payable]
     pub fn new_user(&mut self,
         wallet: AccountId,
         n: String,
@@ -87,6 +92,7 @@ impl Contract {
         mail: String,
         interst: u8){
         assert!(!self.users.contains_key(&wallet.clone()), "User already exists");
+        let storage_before = env::storage_usage();
         self.users.insert(&wallet.clone(), &User{name: n,
             discord: disc,
             email: mail,
@@ -94,6 +100,9 @@ impl Contract {
             my_exp: Vec::new(),
             pov_exp: Vec::new(),
             date: 0});
+        let storage_after = env::storage_usage();
+        let storage_used = storage_after - storage_before;
+        //Promise::new();
     }
     
     pub fn add_experience(&mut self,
