@@ -24,6 +24,7 @@ pub struct Experience_json{
     moment: String,
     time: u16,
     pov: Vec<(AccountId, String)>,
+    status: String,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -33,11 +34,12 @@ struct Experience{
     description: String,
     url: String,
     topic: u8,
-    reward: u128,
+    reward: Balance,
     exp_date: i64,
     moment: String,
     time: u16,
     pov: UnorderedMap<AccountId, String>,
+    status: String,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Debug)]
@@ -81,10 +83,22 @@ impl Contract {
             fee: 10,
         }
     }
+
+    #[payable]
+    pub fn pay_reward(&mut self, experience_number: u128, wallet: AccountId){
+        let caller = env::signer_account_id();
+        assert_eq!(caller.clone(), self.get_exp_owner(experience_number.clone()),
+        "Caller is not the same as the owner");
+        assert_eq!(self.get_exp_status(experience_number.clone()),
+        "Unpaid".to_string(), "Experience already paid");
+        Promise::new(wallet).transfer(self.get_reward(experience_number.clone()));
+        let mut experience = self.experience.get(&experience_number.clone()).unwrap();
+        experience.status = "Paid".to_string();
+        self.experience.insert(&experience_number.clone() , &experience);
+    }
 /*
 ** Setters
 */
-    #[payable]
     pub fn new_user(&mut self,
         wallet: AccountId,
         n: String,
@@ -92,7 +106,6 @@ impl Contract {
         mail: String,
         interst: u8){
         assert!(!self.users.contains_key(&wallet.clone()), "User already exists");
-        let storage_before = env::storage_usage();
         self.users.insert(&wallet.clone(), &User{name: n,
             discord: disc,
             email: mail,
@@ -100,9 +113,6 @@ impl Contract {
             my_exp: Vec::new(),
             pov_exp: Vec::new(),
             date: 0});
-        let storage_after = env::storage_usage();
-        let storage_used = storage_after - storage_before;
-        //Promise::new();
     }
     
     pub fn add_experience(&mut self,
@@ -125,7 +135,8 @@ impl Contract {
             time : 0,
             pov: UnorderedMap::new(b"m"),
             topic: topic.clone(),
-            exp_date: expire_date
+            exp_date: expire_date,
+            status: "Unpaid".to_string()
         });
         if self.exp_by_topic.contains_key(&topic.clone()){
             let mut vec = self.exp_by_topic.get(&topic.clone()).unwrap();
@@ -188,7 +199,8 @@ impl Contract {
             time : exp.time,
             pov: exp.pov.to_vec(),
             topic: exp.topic,
-            exp_date: exp.exp_date
+            exp_date: exp.exp_date,
+            status: exp.status
         }
     }
 
@@ -203,6 +215,12 @@ impl Contract {
         self.experience.get(&video_n.clone()).unwrap().title
     }
     
+    pub fn get_exp_owner(&self, video_n: u128) ->AccountId{
+        assert!(self.experience.contains_key(&video_n.clone()),
+        "Experience number {} does not exist", video_n);
+        self.experience.get(&video_n.clone()).unwrap().owner
+    }
+
     pub fn get_description(&self, video_n: u128) -> String{
         assert!(self.experience.contains_key(&video_n.clone()),
         "Experience number {} does not exist", video_n);
@@ -246,11 +264,16 @@ impl Contract {
         self.experience.get(&video_n).unwrap().time
     }
 
-    #[result_serializer(borsh)]
-    pub fn get_pov_of_vid(&self, video_n: u128) ->UnorderedMap<AccountId,String>{
+    pub fn get_pov_of_vid(&self, video_n: u128) ->Vec<(AccountId,String)>{
         assert!(self.experience.contains_key(&video_n.clone()),
         "Experience number {} does not exist", video_n);
-        self.experience.get(&video_n).unwrap().pov
+        self.experience.get(&video_n).unwrap().pov.to_vec()
+    }
+
+    pub fn get_exp_status(&self, video_n: u128) ->String{
+        assert!(self.experience.contains_key(&video_n.clone()),
+        "Experience number {} does not exist", video_n);
+        self.experience.get(&video_n).unwrap().status
     }
 
     pub fn get_exp_by_topic(&self, topic: u8) ->Vec<u128>{
