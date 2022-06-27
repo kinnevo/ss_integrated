@@ -1,12 +1,13 @@
-use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise};
+use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise, BorshStorageKey};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::{U128};
-use near_sdk::collections::{LookupMap, UnorderedMap};
+use near_sdk::collections::{LookupMap, UnorderedMap, Vector};
 use serde::{Deserialize, Serialize};
 
-const YOCTO_NEAR: f64 = 1_000_000_000_000_000_000_000_000.0;
+const YOCTO_NEAR: Balance = 1_000_000_000_000_000_000_000_000;
 //https://docs.near.org/docs/concepts/storage-staking
-const STORAGE_PER_BYTE: Balance = 10_000_000_000_000_000_000;
+//const STORAGE_PER_BYTE: Balance = 10_000_000_000_000_000_000;
+const FEE: f64 = 1.1;
 
 /*
 ** Structures
@@ -19,12 +20,23 @@ pub struct Experience_json{
     description: String,
     url: String,
     topic: u8,
-    reward: u128,
+    reward: f64,
     exp_date: i64,
     moment: String,
     time: u16,
     pov: Vec<(AccountId, String)>,
     status: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct User_json{
+    name: String,
+    discord: String,
+    email: String,
+    interests: u8,
+    my_exp: Vec<u128>,
+    pov_exp: Vec<u128>,
+    date: i64,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -34,7 +46,7 @@ struct Experience{
     description: String,
     url: String,
     topic: u8,
-    reward: Balance,
+    reward: f64,
     exp_date: i64,
     moment: String,
     time: u16,
@@ -42,14 +54,14 @@ struct Experience{
     status: String,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct User{
     name: String,
     discord: String,
     email: String,
     interests: u8,
-    my_exp: Vec<u128>,
-    pov_exp: Vec<u128>,
+    my_exp: Vector<u128>,
+    pov_exp: Vector<u128>,
     date: i64,
 }
 
@@ -60,7 +72,6 @@ pub struct Contract{
     experience: LookupMap<u128, Experience>,
     exp_by_topic: LookupMap< u8, Vec<u128> >,
     n_exp: u128,
-    fee: u128,
 }
 
 /*
@@ -80,42 +91,76 @@ impl Contract {
             experience: LookupMap::new(b"m"),
             exp_by_topic: LookupMap::new(b"m"),
             n_exp: 0,
-            fee: 10,
         }
     }
 
-    //#[payable]
     pub fn pay_reward(&mut self, experience_number: u128, wallet: AccountId){
         let caller = env::signer_account_id();
-        //let owner = env::current_account_id();
-        assert_eq!(caller.clone(), self.getExp_owner(experience_number.clone()),
-        "Caller is not the same as the owner");
+        self.verify_exp_owner(experience_number.clone(), caller.clone());
         assert_eq!(self.getExp_status(experience_number.clone()),
         "Active".to_string(), "Experience not active");
-        Promise::new(wallet).transfer(self.getReward(experience_number.clone()));
-        let mut experience = self.experience.get(&experience_number.clone()).unwrap();
-        experience.status = "Closed".to_string();
-        self.experience.insert(&experience_number.clone() , &experience);
+        assert_ne!(self.experience.get(
+            &experience_number.clone()).unwrap().pov.get(&wallet.clone()),
+            None,
+            "{} did not give a PoV for this experience", wallet.clone());
+        Promise::new(wallet).transfer(
+            (self.getReward(experience_number.clone()) as Balance) * YOCTO_NEAR);
+        let mut exp = self.experience.get(&experience_number.clone()).unwrap();
+        exp.status = "Closed".to_string();
+        self.experience.insert(&experience_number.clone() , &exp);
     }
 /*
 ** Setters
 */
+    //#[derive(BorshStorageKey)]
     pub fn setUser(&mut self,
         wallet: AccountId,
         n: String,
         disc: String,
         mail: String,
-        interst: u8){
+        interests: u8){
         assert!(!self.users.contains_key(&wallet.clone()), "User already exists");
         self.users.insert(&wallet.clone(), &User{name: n,
             discord: disc,
             email: mail,
-            interests: interst,
-            my_exp: Vec::new(),
-            pov_exp: Vec::new(),
+            interests: interests,
+            my_exp: Vector::new(b"m"),
+            pov_exp: Vector::new(b"m"),
             date: 0});
     }
+
+    pub fn setUser_discord(&mut self, discord: String){
+        let wallet = env::signer_account_id();
+        self.verify_user(wallet.clone());
+        let mut user = self.users.get(&wallet.clone()).unwrap();
+        user.discord = discord;
+        self.users.insert(&wallet, &user);
+    }
+
+    pub fn setUser_email(&mut self, email: String){
+        let wallet = env::signer_account_id();
+        self.verify_user(wallet.clone());
+        let mut user = self.users.get(&wallet.clone()).unwrap();
+        user.email = email;
+        self.users.insert(&wallet, &user);
+    }
     
+    pub fn setUser_interests(&mut self, interests: u8){
+        let wallet = env::signer_account_id();
+        self.verify_user(wallet.clone());
+        let mut user = self.users.get(&wallet.clone()).unwrap();
+        user.interests = interests;
+        self.users.insert(&wallet, &user);
+    }
+
+    pub fn setUser_name(&mut self, name: String){
+        let wallet = env::signer_account_id();
+        self.verify_user(wallet.clone());
+        let mut user = self.users.get(&wallet.clone()).unwrap();
+        user.name = name;
+        self.users.insert(&wallet, &user);
+    }
+
     #[payable]
     pub fn setExperience(&mut self,
         experience_name: String,
@@ -126,12 +171,10 @@ impl Contract {
         time: u16,
         expire_date: i64,
         topic: u8) ->u128{
-        assert!(self.users.contains_key(&env::signer_account_id()),
-        "No user for this wallet");
+        self.verify_user(env::signer_account_id());
         let mut stat = "In process".to_string();
         if env::attached_deposit() > 0 {
-            let amount = (reward * YOCTO_NEAR) as u128;
-            assert!(env::attached_deposit() >= (amount / self.fee.clone() + amount),
+            assert!(env::attached_deposit() >= ((reward * FEE) as u128 * YOCTO_NEAR),
             "Wrong amount of NEARs");
             //send fee to bussiness wallet
             stat = "Active".to_string();
@@ -142,7 +185,7 @@ impl Contract {
             owner: env::signer_account_id(),
             description: description,
             url: url,
-            reward: (reward * YOCTO_NEAR) as u128,
+            reward: reward,
             moment: moment,
             time : time,
             pov: UnorderedMap::new(b"m"),
@@ -161,63 +204,78 @@ impl Contract {
             self.exp_by_topic.insert(&topic.clone(), &vec);
         }
         let mut usr = self.users.get(&env::signer_account_id()).unwrap();
-        usr.my_exp.push(self.n_exp.clone());
+        usr.my_exp.push(&self.n_exp.clone());
         self.users.insert(&env::signer_account_id(), &usr);
         self.n_exp
     }
 
+    pub fn setMoment_comment(&mut self, video_n: u128, comment: String){
+        self.verify_exp(video_n.clone());
+        self.verify_exp_owner(video_n.clone(), env::signer_account_id());
+        let mut exp = self.experience.get(&video_n.clone()).unwrap();
+        exp.moment = comment;
+        self.experience.insert(&video_n.clone(), &exp);
+    }
+
+    pub fn setMomment_time(&mut self, video_n: u128, time: u16){
+        self.verify_exp(video_n.clone());
+        self.verify_exp_owner(video_n.clone(), env::signer_account_id());
+        let mut exp = self.experience.get(&video_n.clone()).unwrap();
+        exp.time = time;
+        self.experience.insert(&video_n.clone(), &exp);
+    }
+
+    pub fn setExperience_description(&mut self, video_n: u128, description: String){
+        self.verify_exp(video_n.clone());
+        self.verify_exp_owner(video_n.clone(), env::signer_account_id());
+        let mut exp = self.experience.get(&video_n.clone()).unwrap();
+        exp.description = description;
+        self.experience.insert(&video_n.clone(), &exp);
+    }
+
+    pub fn setExperience_expire_date(&mut self, video_n: u128, date: i64){
+        self.verify_exp(video_n.clone());
+        self.verify_exp_owner(video_n.clone(), env::signer_account_id());
+        assert_eq!(self.experience.get(&video_n.clone()).unwrap().status.clone(),
+        "In process".to_string(), "Experience not in process");
+        let mut exp = self.experience.get(&video_n.clone()).unwrap();
+        exp.exp_date = date;
+        self.experience.insert(&video_n.clone(), &exp);
+    }
+
     #[payable]
     pub fn activateExperience(&mut self, video_n: u128){
-        assert!(self.users.contains_key(&env::signer_account_id()),
-        "No user for this wallet");
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not esxist", video_n);
+        self.verify_user(env::signer_account_id());
+        self.verify_exp(video_n.clone());
         assert_eq!(self.experience.get(&video_n.clone()).unwrap().status.clone(),
         "In process".to_string(), "Experience already activated");
-        assert_eq!(self.experience.get(&video_n.clone()).unwrap().owner.clone(),
-        env::signer_account_id(), "Signer is not the owner of the video");
+        self.verify_exp_owner(video_n.clone(), env::signer_account_id());
         let reward = self.experience.get(&video_n.clone()).unwrap().reward.clone();
-        assert!(env::attached_deposit() >= (reward / self.fee.clone() + reward),
-        "Wrong amount of NEARs");
+        assert!(env::attached_deposit() >= ((reward * FEE) as u128 * YOCTO_NEAR),
+        "Not enough tokens");
         let mut exp = self.experience.get(&video_n.clone()).unwrap();
         exp.status = "Active".to_string();
         self.experience.insert(&video_n.clone(), &exp);
         //send fee to bussiness wallet
     }
-/*    pub fn setMoment(&mut self,
-        wallet: AccountId,
-        experience_number: u128,
-        time: u16,
-        comment: String){
-        assert!(self.experience.contains_key(&experience_number.clone()),
-        "Experience number {} does not exist", experience_number);
-        let mut exp = self.experience.get(&experience_number.clone()).unwrap();
-        if exp.owner == wallet{
-            exp.moment = comment;
-            exp.time = time;
-            self.experience.insert(&experience_number, &exp);
-        }
-    }
-*/
+
     pub fn setPov(&mut self, video_n: u128, wallet: AccountId, pov: String){
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not esxist", video_n);
-        assert!(self.users.contains_key(&wallet.clone()), "User does not exist");
+        self.verify_exp(video_n.clone());
+        self.verify_user(wallet.clone());
         let mut exp = self.experience.get(&video_n.clone()).unwrap();
         assert_eq!(exp.pov.get(&wallet.clone()), None,
         "User has already given a pov for this experience");
         exp.pov.insert(&wallet.clone(), &pov);
         self.experience.insert(&video_n.clone(), &exp);
         let mut usr = self.users.get(&wallet.clone()).unwrap();
-        usr.pov_exp.push(video_n.clone());
+        usr.pov_exp.push(&video_n.clone());
         self.users.insert(&wallet.clone(), &usr);
     }
 /*
 ** Getters
 */
     pub fn getExperience(&self, video_n: u128) ->Experience_json{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         let exp = self.experience.get(&video_n.clone()).unwrap();
         Experience_json{title: exp.title,
             owner: exp.owner,
@@ -233,75 +291,73 @@ impl Contract {
         }
     }
 
-    pub fn getUser(&self, wallet: AccountId) ->User{
-        assert!(self.users.contains_key(&wallet.clone()), "No such user");
-        self.users.get(&wallet).unwrap()
+    pub fn getUser(&self, wallet: AccountId) ->User_json{
+        self.verify_user(wallet.clone());
+        let user = self.users.get(&wallet).unwrap();
+        User_json{
+            name: user.name,
+            discord: user.discord,
+            email: user.email,
+            interests: user.interests,
+            my_exp: user.my_exp.to_vec(),
+            pov_exp: user.pov_exp.to_vec(),
+            date: user.date
+        }
     }
 
     pub fn getTitle(&self, video_n: u128) ->String{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n.clone()).unwrap().title
     }
     
     pub fn getExp_owner(&self, video_n: u128) ->AccountId{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n.clone()).unwrap().owner
     }
 
     pub fn getExp_description(&self, video_n: u128) -> String{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n.clone()).unwrap().description
     }
 
     pub fn getUrl(&self, video_n: u128) -> String{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         let exp = self.experience.get(&video_n.clone()).unwrap();
         exp.url
     }
 
     pub fn getTopic(&self, video_n: u128) -> u8 {
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n.clone()).unwrap().topic
     }
 
-    pub fn getReward(&self, video_n: u128) -> u128{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+    pub fn getReward(&self, video_n: u128) -> f64{
+        self.verify_exp(video_n.clone());
         (self.experience.get(&video_n.clone())).unwrap().reward
     }
 
     pub fn getExpiration_date(&self, video_n: u128) ->i64{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n).unwrap().exp_date
     }
 
     pub fn getMoment_coment(&self, video_n: u128) ->String{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n).unwrap().moment
     }
 
     pub fn getMoment_time(&self, video_n: u128) ->u16{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n).unwrap().time
     }
 
     pub fn getPov_of_vid(&self, video_n: u128) ->Vec<(AccountId,String)>{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n).unwrap().pov.to_vec()
     }
 
     pub fn getExp_status(&self, video_n: u128) ->String{
-        assert!(self.experience.contains_key(&video_n.clone()),
-        "Experience number {} does not exist", video_n);
+        self.verify_exp(video_n.clone());
         self.experience.get(&video_n).unwrap().status
     }
 
@@ -310,43 +366,59 @@ impl Contract {
     }
 
     pub fn getUser_name(&self, wallet: AccountId) ->String{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
+        self.verify_user(wallet.clone());
         self.users.get(&wallet).unwrap().name
     }
 
     pub fn getUser_discord(&self, wallet: AccountId) ->String{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
+        self.verify_user(wallet.clone());
         self.users.get(&wallet).unwrap().discord
     }
 
     pub fn getUser_email(&self, wallet: AccountId) ->String{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
+        self.verify_user(wallet.clone());
         self.users.get(&wallet).unwrap().email
     }
 
     pub fn getUser_interests(&self, wallet: AccountId) ->u8{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
+        self.verify_user(wallet.clone());
         self.users.get(&wallet).unwrap().interests
     }
 
     pub fn getUser_exp(&self, wallet: AccountId) ->Vec<u128>{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
+        self.verify_user(wallet.clone());
         let usr = self.users.get(&wallet.clone()).unwrap();
-        usr.my_exp
+        usr.my_exp.to_vec()
     }
 
     pub fn getUser_exp_pov(&self, wallet: AccountId) ->Vec<u128>{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
-        self.users.get(&wallet).unwrap().pov_exp
+        self.verify_user(wallet.clone());
+        self.users.get(&wallet).unwrap().pov_exp.to_vec()
     }
 
     pub fn getUser_date(&self, wallet: AccountId) ->i64{
-        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
+        self.verify_user(wallet.clone());
         self.users.get(&wallet).unwrap().date
     }
 
     pub fn getNumber_of_experiences(&self) ->u128{
         self.n_exp
+    }
+/*
+** Verifiers
+*/
+    fn verify_exp(&self, video_n: u128){
+        assert!(self.experience.contains_key(&video_n.clone()),
+        "Experience number {} does not exist", video_n);
+    }
+
+    fn verify_exp_owner(&self, video_n: u128, wallet: AccountId){
+        assert_eq!(self.experience.get(&video_n.clone()).unwrap().owner.clone(),
+        wallet.clone(), "{} is not the owner of the experience", wallet.clone());
+    }
+
+    fn verify_user(&self, wallet: AccountId){
+        assert!(self.users.contains_key(&wallet.clone()),"No user for this wallet");
     }
 }
 
