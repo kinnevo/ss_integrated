@@ -26,17 +26,53 @@ Initializing contract:
 
 Add new user:
 
-`near call <CONTRACT OWNER WALLET> setUser --args '{"wallet": "<USER WALLET>", "n": "<USER NAME>", "disc": "<USER DIRCORD>", "mail": "<USER EMAIL>", "interst": <CODE NUMBER FOR USER ITERESTS>}' --accountId <CALLER WALLET>`
+`near call <CONTRACT OWNER WALLET> setUser --args '{"wallet": "<USER WALLET>", "n": "<USER NAME>", "disc": "<USER DIRCORD>", "mail": "<USER EMAIL>", "interests": u8}' --accountId <CALLER WALLET>`
+
+
+Change user discord:
+
+`near call <CONTRACT OWNER WALLET> setUser_discord --args '{"discord": "<USER DIRCORD>"}' --accountId <CALLER WALLET>`
+
+
+Change user email:
+
+`near call <CONTRACT OWNER WALLET> setUser_email --args '{"email": "<USER EMAIL>"}' --accountId <CALLER WALLET>`
+
+
+Change user interests:
+
+`near call <CONTRACT OWNER WALLET> setUser_interests --args '{"interests": u8}' --accountId <CALLER WALLET>`
+
+
+Change user name:
+
+`near call <CONTRACT OWNER WALLET> setUser_name --args '{"name": "<USER NAME>"}' --accountId <CALLER WALLET>`
 
 
 Add new experience (returns experience's code number):
 
-`near call <CONTRACT OWNER WALLET> setExperience --args '{"wallet": "<USER WALLET>", "experience_name": "<NAME>", "description": "<EXPERIENCE DESCRIPTION>", "url": "<VIDEO URL>", "reward": f64, "expire_date": <EXPIRATION DATE>, "topic": u8}' --accountId <CALLER WALLET>`
+`near call <CONTRACT OWNER WALLET> setExperience --args '{"experience_name": "<NAME>", "description": "<EXPERIENCE DESCRIPTION>", "url": "<VIDEO URL>", "reward": f64, "moment": "<COMMENT>", "time": u16, "expire_date": i64, "topic": u8}' --accountId <CALLER WALLET>`
+optional: `--deposit <NEARS>`
 
 
-Add moment to experience:
+Change moment comment of experience:
 
-`near call <CONTRACT OWNER WALLET> setMoment --args '{"wallet": "<USER WALLET>", "experience_number": u128, "time": u16, "comment": "<MOMENT COMMENT>"}' --accountId <CALLER WALLET>`
+`near call <CONTRACT OWNER WALLET> setMoment_comment --args '{"video_n": u128, "comment": "<MOMENT COMMENT>"}' --accountId <CALLER WALLET>`
+
+
+Change moment time of experience:
+
+`near call <CONTRACT OWNER WALLET> setMoment_time --args '{"video_n": u128, "time": u16}' --accountId <CALLER WALLET>`
+
+
+Change experience description:
+
+`near call <CONTRACT OWNER WALLET> setExperience_description --args '{"video_n": u128, "description": "<EXPERIENCE DESCRIPTION>"}' --accountId <CALLER WALLET>`
+
+
+Change experience expire date:
+
+`near call <CONTRACT OWNER WALLET> setExperience_expire_date --args '{"video_n": u128, "date": i64}' --accountId <CALLER WALLET>`
 
 
 Add PoV to experience:
@@ -154,3 +190,17 @@ Get user's date of last comment:
 Get total of experiences in the contract:
 
 `near view <CONTRACT OWNER WALLET> getNumber_of_experiences --accountId <CALLER WALLET>`
+
+
+**
+** Transfer Tokens **
+**
+
+Activate an experience:
+
+`near call <CONTRACT> activateExperience --args '{"video_n": u128}' --accountId <CALLER WALLET> --deposit <NEAR>`
+
+
+Pay reward to best PoV:
+
+`near call <CONTRACT> pay_reward --args '{"experience_number": u128, "wallet": "<BEST POV WALLET>"}' --accountId <CALLER WALLET>`
