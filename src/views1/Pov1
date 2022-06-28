@@ -1,10 +1,19 @@
+<!--
 <template>
-  <v-app>
-    <Navbar />
-    <v-content class="mx-4 mb-4">
-Hola
+<div class="pov">
+    <h1 class="subheading grey--text">Team</h1>
 
+    <v-container class="my-5">
 
+    </v-container>
+</div>
+</template>
+-->
+<template>
+    <div class="pov">
+    <h1 class="subheading grey--text">Point of View</h1>
+<div id="app">
+  <v-app id="inspire">
     <v-container class="grey lighten-5">
       <v-row no-gutters>
         <v-col
@@ -23,24 +32,20 @@ Hola
         </v-col>
       </v-row>
     </v-container>
-
-    </v-content>
-
   </v-app>
+</div>
+    </div>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld';
-import Navbar from './components/Navbar'
-
 export default {
-  name: 'App',
-  components: { 
-    Navbar
-  },
+  name: "Pov",
 
-  data: () => ({
-    //
-  })
+  data() {
+    return {
+        pov: ""
+    }
+  }
 }
+
 </script>
