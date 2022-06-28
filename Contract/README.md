@@ -192,9 +192,9 @@ Get total of experiences in the contract:
 `near view <CONTRACT OWNER WALLET> getNumber_of_experiences --accountId <CALLER WALLET>`
 
 
-**
+***
 ** Transfer Tokens **
-**
+***
 
 Activate an experience:
 
