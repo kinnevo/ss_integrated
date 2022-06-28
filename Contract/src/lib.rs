@@ -1,10 +1,10 @@
-use near_sdk::{env, near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise, BorshStorageKey};
+use near_sdk::{env, near_bindgen, AccountId, Balance, PanicOnDefault, Promise};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::json_types::{U128};
 use near_sdk::collections::{LookupMap, UnorderedMap, Vector};
 use serde::{Deserialize, Serialize};
 
 const YOCTO_NEAR: Balance = 1_000_000_000_000_000_000_000_000;
+const SEND_FUNDS: Balance = 4_500_000_000_000_000_000;
 //https://docs.near.org/docs/concepts/storage-staking
 //const STORAGE_PER_BYTE: Balance = 10_000_000_000_000_000_000;
 const FEE: f64 = 1.1;
@@ -72,6 +72,7 @@ pub struct Contract{
     experience: LookupMap<u128, Experience>,
     exp_by_topic: LookupMap< u8, Vec<u128> >,
     n_exp: u128,
+    ss_wallet: AccountId,
 }
 
 /*
@@ -91,6 +92,7 @@ impl Contract {
             experience: LookupMap::new(b"m"),
             exp_by_topic: LookupMap::new(b"m"),
             n_exp: 0,
+            ss_wallet: "jciglesias.testnet".parse().unwrap(),
         }
     }
 
@@ -104,10 +106,20 @@ impl Contract {
             None,
             "{} did not give a PoV for this experience", wallet.clone());
         Promise::new(wallet).transfer(
-            (self.getReward(experience_number.clone()) as Balance) * YOCTO_NEAR);
+            (self.getReward(experience_number.clone()) as Balance)
+            * YOCTO_NEAR);
         let mut exp = self.experience.get(&experience_number.clone()).unwrap();
         exp.status = "Closed".to_string();
         self.experience.insert(&experience_number.clone() , &exp);
+    }
+
+    fn send_fee(&self, deposit: Balance, reward: f64, wallet: AccountId){
+        let fee = ((reward * FEE) - reward) as u128 * YOCTO_NEAR;
+        Promise::new(self.ss_wallet.clone()).transfer(fee);
+        let diff = deposit - ((reward as u128 * YOCTO_NEAR) + fee);
+        if diff > SEND_FUNDS{
+            Promise::new(wallet).transfer(diff);
+        }
     }
 /*
 ** Setters
@@ -176,7 +188,8 @@ impl Contract {
         if env::attached_deposit() > 0 {
             assert!(env::attached_deposit() >= ((reward * FEE) as u128 * YOCTO_NEAR),
             "Wrong amount of NEARs");
-            //send fee to bussiness wallet
+            self.send_fee(env::attached_deposit(), reward.clone(),
+            env::signer_account_id());
             stat = "Active".to_string();
         }
         self.n_exp += 1;
@@ -256,7 +269,8 @@ impl Contract {
         let mut exp = self.experience.get(&video_n.clone()).unwrap();
         exp.status = "Active".to_string();
         self.experience.insert(&video_n.clone(), &exp);
-        //send fee to bussiness wallet
+        self.send_fee(env::attached_deposit(), reward.clone(),
+        env::signer_account_id());
     }
 
     pub fn setPov(&mut self, video_n: u128, wallet: AccountId, pov: String){
