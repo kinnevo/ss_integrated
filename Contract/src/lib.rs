@@ -92,7 +92,7 @@ impl Contract {
             experience: LookupMap::new(b"m"),
             exp_by_topic: LookupMap::new(b"m"),
             n_exp: 0,
-            ss_wallet: "jciglesias.testnet".parse().unwrap(),
+            ss_wallet: "jciglesias.testnet".parse().unwrap(), //to change wallet
         }
     }
 
