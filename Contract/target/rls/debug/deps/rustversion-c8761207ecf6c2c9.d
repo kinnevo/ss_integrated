@@ -1,0 +1,20 @@
+/home/user/Near/sharingshard/Contract/target/rls/debug/deps/librustversion-c8761207ecf6c2c9.so: /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/lib.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/attr.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/bound.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/constfn.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/date.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/error.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/expand.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/expr.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/iter.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/release.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/time.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/token.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/version.rs /home/user/Near/sharingshard/Contract/target/rls/debug/build/rustversion-5188e62f969e8bfa/out/version.expr
+
+/home/user/Near/sharingshard/Contract/target/rls/debug/deps/rustversion-c8761207ecf6c2c9.d: /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/lib.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/attr.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/bound.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/constfn.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/date.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/error.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/expand.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/expr.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/iter.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/release.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/time.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/token.rs /home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/version.rs /home/user/Near/sharingshard/Contract/target/rls/debug/build/rustversion-5188e62f969e8bfa/out/version.expr
+
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/lib.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/attr.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/bound.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/constfn.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/date.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/error.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/expand.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/expr.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/iter.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/release.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/time.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/token.rs:
+/home/user/.cargo/registry/src/github.com-1ecc6299db9ec823/rustversion-1.0.7/src/version.rs:
+/home/user/Near/sharingshard/Contract/target/rls/debug/build/rustversion-5188e62f969e8bfa/out/version.expr:
+
+# env-dep:OUT_DIR=/home/user/Near/sharingshard/Contract/target/rls/debug/build/rustversion-5188e62f969e8bfa/out
