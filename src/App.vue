@@ -1,42 +1,28 @@
 <template>
-  <v-app>
-    <Navbar />
-    <v-content class="mx-4 mb-4">
-Hola
+<v-app>
 
 
-    <v-container class="grey lighten-5">
-      <v-row no-gutters>
-        <v-col
-          v-for="n in 3"
-          :key="n"
-          cols="12"
-          sm="4"
-        >
-          <v-card
-            class="pl-10 py-5"
-            outlined
-            tile
-          >
-            One of three columns
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
+    <v-main class="mx-4 mb-4">
+      <v-container fluid>
 
-    </v-content>
+          <NavBar></NavBar>
+            <router-view></router-view>
 
-  </v-app>
+
+      </v-container>
+    </v-main>
+      
+</v-app>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld';
-import Navbar from './components/Navbar'
+import NavBar from './components/NavBar'
 
 export default {
   name: 'App',
   components: { 
-    Navbar
+    NavBar,
   },
 
   data: () => ({
@@ -44,3 +30,27 @@ export default {
   })
 }
 </script>
+
+
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+nav {
+  padding: 30px;
+
+  a {
+    font-weight: bold;
+    color: #2c3e50;
+
+    &.router-link-exact-active {
+      color: #42b983;
+    }
+  }
+}
+</style>
