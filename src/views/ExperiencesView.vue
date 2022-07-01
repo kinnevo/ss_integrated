@@ -2,11 +2,10 @@
 <div class="c_experienciesview">
     <h1 class="subheading grey--text">Experiences</h1>
     <p>Choose the experiences where you want to collaborate</p>
-    <v-container class="my-5">
+    <v-container  v-if= display_experiencies class="my-5">
       <v-layout row wrap>
 <!--      <p>Number of  of Experiences: {{ experienciesview.length }}</p> -->
 <!--      <p>Number of  of Experiences: {{ experienciesview }}</p><br/> -->
-      <p>Number of  of Experiences: {{ exp_info }}</p>
 
 
 
@@ -113,6 +112,8 @@ struct Experience{
       exp_list: [""],
       exp_info: "",
       experienciesview: [""],
+      display_experiencies: false,
+
     }
   },
   methods: {
@@ -144,6 +145,8 @@ struct Experience{
       }
       
       console.log( this.experienciesview );
+      this.display_experiencies = true;
+
     }
 
 
