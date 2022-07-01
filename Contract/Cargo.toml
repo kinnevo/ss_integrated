@@ -16,7 +16,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 near-sdk = "=4.0.0-pre.5"
-near-primitives-core = "0.13.0"
+#near-primitives-core = "0.13.0"
+#near-account-id = "0.14.0"
 serde = { version = "1", features = ["derive"] }
 
 [profile.release]

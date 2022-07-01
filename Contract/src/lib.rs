@@ -454,12 +454,12 @@ mod tests {
     use near_sdk::{testing_env, VMContext};
 //    use near_primitives_core::config::ViewConfig;
 
-    fn get_context(predecessor_account_id: near_primitives_core::types::AccountId, storage_usage: u64) -> VMContext {
+    fn get_context(wallet: &str, storage_usage: u64) -> VMContext {
         VMContext {
-            current_account_id: "bob.testnet".parse().unwrap(),
-            signer_account_id: "jane.testnet".parse().unwrap(),
+            current_account_id: "jane.testnet".parse().unwrap(),
+            signer_account_id: wallet.parse().unwrap(),
             signer_account_pk: vec![0, 1, 2],
-            predecessor_account_id: predecessor_account_id.parse().unwrap(),
+            predecessor_account_id: "bob.testnet".parse().unwrap(),
             input: vec![],
             block_index: 0,
             block_timestamp: 0,
@@ -476,9 +476,9 @@ mod tests {
     }
     #[test]
     fn grant_access() {
-        // let account: near_primitives_core::types::AccountId = "John.testnet".parse().unwrap();
-        // let context = get_context(account, 0);
-        // testing_env!(context);
+        // let account = "John.testnet";
+        let context = get_context("bob.testnet", 0);
+        testing_env!(context);
         let mut contract = Contract::new();
         let id: AccountId = "pepe.testnet".parse().unwrap();
         contract.setUser(
