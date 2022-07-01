@@ -29,16 +29,57 @@ near view dev-1656452729299-85030592138402 getNumber_of_experiences --accountId 
     </div>
     <p>Display the information received</p>
     The user:  has created {{this.video_info}} experiences
-    <p><!--
+    <!--
       <span v-for="(item,index) in this.exp_list">
             <p>{{ index}}</p>
       </span>
-      -->
-    </p>
+<span v-for="exp in exp_list">
+<li  {{ exp }} </li>
+</span>
+
+<ul v-if="exp_list.length" :key>
+  <li v-for="exp in exp_list">
+    {{ exp }}
+  </li>
+</ul>
+-->
+<div>
+  <p>exp_list: {{ exp_list.length }}</p>
+  <span v-for="exp in exp_list.length" :key="exp">
+    {{ exp }}
+  </span>
+  <p>Experiencia: {{ exp_info.description }}</p>
+  <p>URL: {{ exp_info.url }}</p>
+</div>
+
+
+<ul>
+  <li v-for="product in products"      :key='product.id' >
+    {{ product.name }}
+  </li>
+</ul>
+
+<div>
+  <p>Screen: {{ x_screen_data.length }}</p>
+  <span v-for="item in x_screen_data.length" :key="item">
+    <p class="text-left">item: {{item}}: {{ x_screen_data[item-1] }}</p>
+</span>
+</div>
+
+<div>
+  <p>Screen: {{ x_screen_data.length }}</p>
+  <span v-for="item in x_screen_data.length" :key="item">
+    <p class="text-left">item: {{item}}: {{ x_screen_data[item-1].description }}</p>
+</span>
+</div>
+
+
   </div>
 </template>
 
 <script>
+ 
+
 
 import * as nearAPI from 'near-api-js'
 const { connect, WalletConnection, keyStores, Contract } = nearAPI;
@@ -66,6 +107,12 @@ const config = {
         video_info: 0,
         exp_list: [""],
         exp_info: "",
+        products:[
+          {id: 0, name: 'shirt'},
+          {id: 1, name: 'jacket'},
+          {id: 2, name: 'shoes'},
+        ],
+        x_screen_data: [""],
       }
     },
 
@@ -88,10 +135,17 @@ const config = {
           });
           console.log( this.exp_list );
 
-          this.exp_info = await contract.getExperience({
-            video_n: 1
-          });
-          console.log( this.exp_info );
+          for ( let i = 0 ; i < this.exp_list.length ; i++  ){
+
+            this.exp_info = await contract.getExperience({
+              video_n: this.exp_list[i]
+            });
+            console.log( this.exp_info );
+            this.x_screen_data[i] = this.exp_info;
+          }
+          
+          console.log( this.x_screen_data );
+          console.log( screen );
 
         }
       
