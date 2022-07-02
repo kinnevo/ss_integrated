@@ -6,8 +6,7 @@
       <v-layout row wrap>
 <!--      <p>Number of  of Experiences: {{ experienciesview.length }}</p> -->
 <!--      <p>Number of  of Experiences: {{ experienciesview }}</p><br/> -->
-
-
+<!--      <p>Number of  of Experiences: {{ exp_info }}</p> -->
 
         <v-flex xs12 sm6 md4 lg3 v-for="item in experienciesview.length" :key="item">
           <v-card text class="text-xs-center ma-3">

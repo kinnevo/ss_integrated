@@ -1,77 +1,26 @@
 <template>
   <div class="about">
-    <h1>This is a page to test each access to the data in the blockchain</h1>
-    <h2>Read the experiences created by a user</h2>
+    <h1>Create to sides:</h1>
+    <ul>
+      <li>The button that prepare info to connect to the page that display the moment</li>
+      <li>The page that display the moment</li>
+      <li></li>
+    </ul>
+
     <div class="text-left">
     <code>
-        Read the number of experiences of a given user<br/>
-        Read the information of each experience
-        Build the structure to display information
+        the button side<br/>
+        url
+        title
+        description
+        id
+        owner
+        reward
 
-experienciesview: [
-        { 
-            title: "Aprendizajes en el Silicon Valley",
-            owner: "zavala55.testnet",
-            description: "Narración de la Experiencia de Virgilio Raiden en su visita a SV", 
-            url: "https://youtube.com/embed/WCUGI8PGcGw",
-            topic: 8,
-            reward: 11,
-            exp_date: 22,
-            moment: "TBD",
-            time: 33,
-            pov: "TBD",
-            status: "En proceso",
-         },
-
-near view dev-1656452729299-85030592138402 getNumber_of_experiences --accountId zavala55.testnet
-
+        time
+        moment
     </code>
     </div>
-    <p>Display the information received</p>
-    The user:  has created {{this.video_info}} experiences
-    <!--
-      <span v-for="(item,index) in this.exp_list">
-            <p>{{ index}}</p>
-      </span>
-<span v-for="exp in exp_list">
-<li  {{ exp }} </li>
-</span>
-
-<ul v-if="exp_list.length" :key>
-  <li v-for="exp in exp_list">
-    {{ exp }}
-  </li>
-</ul>
--->
-<div>
-  <p>exp_list: {{ exp_list.length }}</p>
-  <span v-for="exp in exp_list.length" :key="exp">
-    {{ exp }}
-  </span>
-  <p>Experiencia: {{ exp_info.description }}</p>
-  <p>URL: {{ exp_info.url }}</p>
-</div>
-
-
-<ul>
-  <li v-for="product in products"      :key='product.id' >
-    {{ product.name }}
-  </li>
-</ul>
-
-<div>
-  <p>Screen: {{ x_screen_data.length }}</p>
-  <span v-for="item in x_screen_data.length" :key="item">
-    <p class="text-left">item: {{item}}: {{ x_screen_data[item-1] }}</p>
-</span>
-</div>
-
-<div>
-  <p>Screen: {{ x_screen_data.length }}</p>
-  <span v-for="item in x_screen_data.length" :key="item">
-    <p class="text-left">item: {{item}}: {{ x_screen_data[item-1].description }}</p>
-</span>
-</div>
 
 
   </div>
@@ -107,11 +56,6 @@ const config = {
         video_info: 0,
         exp_list: [""],
         exp_info: "",
-        products:[
-          {id: 0, name: 'shirt'},
-          {id: 1, name: 'jacket'},
-          {id: 2, name: 'shoes'},
-        ],
         x_screen_data: [""],
       }
     },
